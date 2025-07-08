@@ -4,6 +4,7 @@ import "package:dlox/parser/mod.dart";
 import "package:dlox/parser/tree_walkers/eval/eval.dart";
 import "package:dlox/parser/tree_walkers/pretty_print/pretty_print.dart";
 import "package:dlox/parser/tree_walkers/resolver/resolver.dart";
+import "package:dlox/runner.dart";
 import "package:dlox/scanner/scanner.dart";
 import "package:dlox/scanner/token.dart";
 import "package:logging/logging.dart";
@@ -11,18 +12,21 @@ import "package:logging/logging.dart";
 bool hadError = false;
 bool hadRuntimeError = false;
 Logger logger = Logger("lib.dlox");
+late DloxRunner runtime;
 
 void runFile(String path) {
   run(File(path).readAsStringSync());
 
   if (hadError) {
-    exit(65);
+    runtime.exitWCode(65);
   }
 
   if (hadRuntimeError) {
-    exit(70);
+    runtime.exitWCode(70);
   }
 }
+
+void setRuntime(DloxRunner rt) => runtime = rt;
 
 void run(String code) {
   logger.fine("Running $code");

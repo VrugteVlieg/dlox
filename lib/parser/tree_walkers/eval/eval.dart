@@ -1,5 +1,6 @@
 import 'dart:collection';
 
+import 'package:dlox/dlox.dart';
 import 'package:dlox/parser/types/types.dart';
 import 'package:dlox/scanner/token.dart';
 import 'package:dlox/parser/tree_walkers/pretty_print/pretty_print.dart';
@@ -58,7 +59,7 @@ LoxValue _eval(LoxNode n) {
     PrintStatement() => () {
         Object? toPrint = _eval(n.expr);
         log.finer("Printing ${toPrint.stringify()}(${toPrint.runtimeType})");
-        print(toPrint);
+        runtime.writeStdOut(toPrint);
       }(),
     VarDecl() => _currentScope.define(n.id.lexeme, n.expr.map(_eval)),
     Variable() => _lookupVariable(n.id, n),

@@ -1,6 +1,5 @@
 import 'dart:math';
 
-import 'package:dlox/parser/tree_walkers/pretty_print/pretty_print.dart';
 import 'package:dlox/parser/types/types.dart';
 import 'package:dlox/scanner/token.dart';
 import 'package:logging/logging.dart';
@@ -114,7 +113,7 @@ class Parser {
 
     _consume(TokenType.LEFT_BRACE, "Expected '{' at start of block");
     List<Declaration> body = _block();
-    logger.finer("Body: ${prettyPrintProgram(body)}");
+    logger.finer("Body: ${body.prettyPrint}");
     return FuncDecl(id, params, body);
   }
 
@@ -246,12 +245,12 @@ class Parser {
     while (!_check(TokenType.RIGHT_BRACE) && !_isAtEnd()) {
       Declaration? toAdd = _declaration();
       if (toAdd != null) {
-        logger.finest("Parsed param ${prettyPrintProgram([toAdd])}");
+        logger.finest("Parsed param ${toAdd.prettyPrint}");
         out.add(toAdd);
       }
     }
 
-    logger.finer("Block body: ${prettyPrintProgram(out)}");
+    logger.finer("Block body: ${out.prettyPrint}");
 
     _consume(TokenType.RIGHT_BRACE, "Expect '}' after block");
 
@@ -327,7 +326,7 @@ class Parser {
 
     _consume(TokenType.LEFT_BRACE, "Expected '{' at start of block");
     List<Declaration> body = _block();
-    logger.finer("Body: ${prettyPrintProgram(body)}");
+    logger.finer("Body: ${body.prettyPrint}");
     return LambdaFunc(params, body);
   }
 

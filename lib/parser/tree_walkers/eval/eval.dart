@@ -3,7 +3,6 @@ import 'dart:collection';
 import 'package:dlox/dlox.dart';
 import 'package:dlox/parser/types/types.dart';
 import 'package:dlox/scanner/token.dart';
-import 'package:dlox/parser/tree_walkers/pretty_print/pretty_print.dart';
 import 'package:logging/logging.dart';
 
 part "environment.dart";

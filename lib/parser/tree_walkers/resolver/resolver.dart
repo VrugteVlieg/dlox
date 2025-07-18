@@ -1,6 +1,5 @@
 import 'package:dlox/parser/parser.dart';
 import 'package:dlox/parser/tree_walkers/eval/eval.dart';
-import 'package:dlox/parser/tree_walkers/pretty_print/pretty_print.dart';
 import 'package:dlox/parser/types/types.dart';
 import 'package:dlox/scanner/token.dart';
 import 'package:logging/logging.dart';

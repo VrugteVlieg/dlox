@@ -2,7 +2,6 @@ import "dart:io";
 
 import "package:dlox/parser/mod.dart";
 import "package:dlox/parser/tree_walkers/eval/eval.dart";
-import "package:dlox/parser/tree_walkers/pretty_print/pretty_print.dart";
 import "package:dlox/parser/tree_walkers/resolver/resolver.dart";
 import "package:dlox/runner.dart";
 import "package:dlox/scanner/scanner.dart";
@@ -30,7 +29,7 @@ void setRuntime(DloxRunner rt) => runtime = rt;
 
 String format(String code) {
   var (_, program) = _parse(code);
-  return prettyPrintProgram(program!);
+  return program!.map((e) => e.prettyPrint).join("\n");
 }
 
 (List<Token> tokens, List<LoxNode>?) _parse(String code) {
@@ -43,7 +42,7 @@ void run(String code) {
   var (tokens, program) = _parse(code);
   if (program == null) return;
   logger.finer("\n\n*******\nProgram parsed successfully\n*******\n\n");
-  logger.fine(prettyPrintProgram(program));
+  logger.fine(program.prettyPrint);
   logger.finer("\n\n*******\nResolving variables\n*******\n\n");
   resolve(program);
   if (hadError) return;

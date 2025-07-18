@@ -28,12 +28,19 @@ void runFile(String path) {
 
 void setRuntime(DloxRunner rt) => runtime = rt;
 
+String format(String code) {
+  var (_, program) = _parse(code);
+  return prettyPrintProgram(program!);
+}
+
+(List<Token> tokens, List<LoxNode>?) _parse(String code) {
+  List<Token> tokens = Scanner(code).scanTokens();
+  return (tokens, Parser(tokens).parse());
+}
+
 void run(String code) {
   logger.fine("Running $code");
-  Scanner scanner = Scanner(code);
-  List<Token> tokens = scanner.scanTokens();
-  Parser parser = Parser(tokens);
-  List<LoxNode>? program = parser.parse();
+  var (tokens, program) = _parse(code);
   if (program == null) return;
   logger.finer("\n\n*******\nProgram parsed successfully\n*******\n\n");
   logger.fine(prettyPrintProgram(program));

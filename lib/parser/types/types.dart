@@ -53,10 +53,22 @@ class VarDecl extends Declaration {
       : "var ${id.lexeme};";
 }
 
-class FuncDecl extends LoxFunc {
+sealed class FunctionDeclaration extends LoxFunc {
   final Token id;
 
-  const FuncDecl(this.id, super.params, super.body);
+  const FunctionDeclaration(this.id, super.params, super.body);
+}
+
+class MethodDecl extends FunctionDeclaration {
+  const MethodDecl(super.id, super.params, super.body);
+
+  @override
+  String get prettyPrint =>
+      "${id.lexeme}(${params.map((e) => e.lexeme).join(", ")}) {\n${body.prettyPrint}\n}";
+}
+
+class FuncDecl extends FunctionDeclaration {
+  const FuncDecl(super.id, super.params, super.body);
 
   @override
   String get prettyPrint =>
@@ -74,7 +86,7 @@ class LambdaFunc extends LoxFunc implements Expr {
 class LoxClass implements Declaration {
   final Token id;
   final Variable? superclass;
-  final List<FuncDecl> methods;
+  final List<FunctionDeclaration> methods;
 
   const LoxClass(this.id, this.methods, {this.superclass});
 

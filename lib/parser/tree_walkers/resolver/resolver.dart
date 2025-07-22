@@ -58,7 +58,7 @@ void _resolveFunction(LoxFunc f, FunctionType type) {
   FunctionType enclosingFunction = _currentFunction;
   _currentFunction = type;
   log.finest(
-      "Beginning scope for ${f is FuncDecl ? f.id.lexeme : "anonymous function"}");
+      "Beginning scope for ${f is FunctionDeclaration ? f.id.lexeme : "anonymous function"}");
   _beginScope();
   log.finest(scopes);
   for (var token in f.params) {
@@ -67,7 +67,7 @@ void _resolveFunction(LoxFunc f, FunctionType type) {
   }
   f.body.forEach(_resolve);
   log.finest(
-      "Ending scope for ${f is FuncDecl ? f.id.lexeme : "anonymous function"}");
+      "Ending scope for ${f is FunctionDeclaration ? f.id.lexeme : "anonymous function"}");
   log.finest(scopes);
   _endScope();
   _currentFunction = enclosingFunction;
@@ -114,7 +114,7 @@ void _resolve(Resolvable n) {
       _resolveLocal(n, n.id);
       break;
     case LoxFunc():
-      if (n is FuncDecl) {
+      if (n is FunctionDeclaration) {
         _declare(n.id);
         _define(n.id);
       }

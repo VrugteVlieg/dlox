@@ -71,7 +71,7 @@ LoxValue _eval(LoxNode n) {
     LoopStatement() => _loopStatement(n),
     BreakStatement() => throw n,
     Call() => _call(n),
-    FuncDecl() => _funcDecl(n),
+    FunctionDeclaration() => _funcDecl(n),
     ReturnStatement() => _returnStatement(n),
     LambdaFunc() =>
       LoxFunction(LambdaFunc(n.params, n.body), _currentScope, false),
@@ -120,7 +120,7 @@ LoxValue _getExpr(Get g) {
   throw RuntimeError(g.name, "Only instances have properties");
 }
 
-LoxValue _funcDecl(FuncDecl f) {
+LoxValue _funcDecl(FunctionDeclaration f) {
   _currentScope.define(f.id.lexeme, LoxFunction(f, _currentScope, false));
   return null;
 }
@@ -350,7 +350,7 @@ class LoxFunction implements LoxCallable {
   const LoxFunction(this.declaration, this.declScope, this.isInitializer);
 
   String get _id => switch (declaration) {
-        FuncDecl(id: var id) => id.lexeme,
+        FunctionDeclaration(id: var id) => id.lexeme,
         LambdaFunc() => "lambda",
       };
 

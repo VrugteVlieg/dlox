@@ -101,7 +101,7 @@ class Parser {
     }
   }
 
-  FuncDecl _function(String kind) {
+  FunctionDeclaration _function(String kind) {
     logger.finer("Parsing $kind function");
     Token id = _consume(TokenType.IDENTIFIER, "Expected $kind name");
     logger.finer("Function ID: ${id.lexeme}");
@@ -114,7 +114,11 @@ class Parser {
     _consume(TokenType.LEFT_BRACE, "Expected '{' at start of block");
     List<Declaration> body = _block();
     logger.finer("Body: ${body.prettyPrint}");
-    return FuncDecl(id, params, body);
+    if (kind == "method") {
+      return MethodDecl(id, params, body);
+    } else {
+      return FuncDecl(id, params, body);
+    }
   }
 
   List<Token> _parameters() {
@@ -149,7 +153,7 @@ class Parser {
       superclass = Variable(_previous());
     }
     _consume(TokenType.LEFT_BRACE, "Expect '{' before class body");
-    List<FuncDecl> methods = [];
+    List<FunctionDeclaration> methods = [];
     while (!_check(TokenType.RIGHT_BRACE) && !_isAtEnd()) {
       methods.add(_function("method"));
     }

@@ -81,7 +81,7 @@ class LambdaFunc extends LoxFunc implements Expr {
 
   @override
   String get prettyPrint =>
-      "fun (${params.map((e) => e.lexeme).join(", ")}) ${body.prettyPrint}";
+      "fun (${params.map((e) => e.lexeme).join(", ")}) {\n${body.prettyPrint}\n}";
 }
 
 class LoxClass implements Declaration {

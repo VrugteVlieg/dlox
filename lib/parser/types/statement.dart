@@ -57,7 +57,7 @@ class BreakStatement extends Statement {
   const BreakStatement();
 
   @override
-  String get prettyPrint => "break";
+  String get prettyPrint => "break;";
 }
 
 sealed class LoopStatement extends Statement {

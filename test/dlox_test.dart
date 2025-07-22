@@ -49,7 +49,6 @@ void main() {
     print("Running $testName");
     var (firstTokens, firstNodes!) = parse(testContent);
     String prettyCode = format(testContent);
-    print("To:\n$prettyCode");
     var (secondTokens, secondNodes!) = parse(prettyCode);
     if (firstTokens.length != secondTokens.length) {
       print(

@@ -21,6 +21,7 @@ extension StringifyNode on LoxValue {
       null => "nil",
       int i => i.toString(),
       double d => d.toString(),
+      String s => "\"$s\"",
       var v => v.toString()
     };
   }

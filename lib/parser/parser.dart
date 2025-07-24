@@ -184,7 +184,7 @@ class Parser {
     if (_match([TokenType.WHILE, TokenType.FOR])) {
       _loopDepth++;
       late LoopStatement out;
-      if (_match(TokenType.WHILE)) {
+      if (_previous().type == TokenType.WHILE) {
         out = _while();
       } else {
         out = _for();
@@ -507,6 +507,13 @@ class Parser {
   }
 
   Token _consume(TokenType type, String message) {
+    String surroundingTokens = tokens
+        .sublist(max(_current, 0), min(tokens.length - 1, _current + 2))
+        .map((t) => t.type)
+        .join("->");
+
+    logger.finest("Consuming $type in [$surroundingTokens]");
+
     if (_check(type)) return _advance();
 
     throw _errorRecovery(_peek(), message);

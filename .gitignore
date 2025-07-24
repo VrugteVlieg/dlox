@@ -27,3 +27,4 @@ doc/api/
 .flutter-plugins-dependencies
 
 .zed
+test/test_report.txt

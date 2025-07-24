@@ -375,7 +375,7 @@ class Parser {
   }
 
   Expr _comparison() {
-    logger.finest("Parsing comparuson");
+    logger.finest("Parsing comparison");
     Expr expr = _term();
 
     while (_match([
@@ -406,7 +406,7 @@ class Parser {
   }
 
   Expr _factor() {
-    logger.finest("Parsing factr");
+    logger.finest("Parsing factor");
     Expr expr = _unary();
     while (_match([TokenType.SLASH, TokenType.STAR])) {
       Token operator = _previous();

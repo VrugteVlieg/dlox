@@ -2,13 +2,22 @@ import 'dart:io';
 
 import 'package:dlox/dlox.dart';
 
-void main() {
-  print(Directory.current.path);
-  List<File?> testFiles = (Directory("./test_cases")
+void main(List<String> args) {
+  Set<String> testPaths = args.toSet();
+  print("Args: $args");
+  List<File?> testFiles = (Directory(Platform.operatingSystem == "windows"
+          ? ".\\test_cases"
+          : "./test_cases")
       .listSync()
       .map((e) => e is File ? e : null)
       .toList()
-    ..retainWhere((e) => e is File));
+    ..retainWhere((e) =>
+        e is File &&
+        (args.isEmpty ||
+            () {
+              print("Checking if ${e.path} is in $testPaths");
+              return testPaths.contains(e.path);
+            }())));
 
   List<(String, String)> testCases = testFiles
       .map((e) =>

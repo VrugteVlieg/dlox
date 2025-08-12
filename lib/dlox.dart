@@ -27,6 +27,13 @@ void runFile(String path) {
 
 void setRuntime(DloxRunner rt) => runtime = rt;
 
+void setLogger(void Function(LogRecord)? onData, Level level) {
+  hierarchicalLoggingEnabled = true;
+  Logger.root.level = level;
+  Logger.root.onRecord.listen(
+      (record) => print("[${record.level}]@${record.time}: ${record.message}"));
+}
+
 String format(String code) {
   var (_, program) = parse(code);
   return program!.map((e) => e.prettyPrint).join("\n");

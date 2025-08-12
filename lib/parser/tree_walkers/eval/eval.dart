@@ -8,7 +8,7 @@ import 'package:logging/logging.dart';
 part "environment.dart";
 part "error.dart";
 
-Logger log = Logger("eval");
+Logger log = Logger("DloxInterpreter.Eval");
 
 bool isEqual(Object? l, Object? r) {
   if (l == null && r == null) return true;

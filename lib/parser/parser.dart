@@ -6,7 +6,7 @@ import 'package:logging/logging.dart';
 
 part "utils.dart";
 
-Logger logger = Logger("Parser");
+Logger logger = Logger("DloxInterpreter.Parser");
 
 class ParserException implements Exception {}
 

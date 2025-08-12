@@ -6,7 +6,7 @@ import 'package:logging/logging.dart';
 
 //TODO add unused variable detector
 
-Logger log = Logger("resolver");
+Logger log = Logger("DloxInterpreter.Resolver");
 
 void _resolveVariable(Expr expr, int depth) => locals[expr] = depth;
 

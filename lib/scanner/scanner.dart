@@ -1,7 +1,7 @@
 import 'package:dlox/scanner/token.dart';
 import 'package:logging/logging.dart';
 
-Logger log = Logger("Scanner");
+Logger log = Logger("DloxInterpreter.Scanner");
 
 final RegExp isNumber = RegExp(r'[0-9]');
 

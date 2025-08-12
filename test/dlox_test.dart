@@ -68,6 +68,8 @@ void main(List<String> args) {
     if (firstNodes.length != secondNodes.length) {
       print(
           "First pass node count ${firstNodes.length} != Second pass node count ${secondNodes.length}");
+      print("First: $firstNodes");
+      print("Second: $secondNodes");
       pass = false;
     }
     if (pass) {

@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:dlox/dlox.dart';
 import 'package:dlox/parser/types/types.dart';
 import 'package:dlox/scanner/token.dart';
 import 'package:logging/logging.dart';
@@ -87,7 +88,7 @@ class Parser {
         if (_check(TokenType.IDENTIFIER)) {
           return _function("function");
         } else {
-          Declaration out = _lambdaFunction();
+          LambdaFunc out = _lambdaFunction()..isExprStatement = true;
           _consume(TokenType.SEMICOLON,
               "Expect ';' after lambda expresison statement");
           return out;

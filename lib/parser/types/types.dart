@@ -77,11 +77,12 @@ class FuncDecl extends FunctionDeclaration {
 }
 
 class LambdaFunc extends LoxFunc implements Expr {
-  const LambdaFunc(super.params, super.body);
+  bool isExprStatement = false;
+  LambdaFunc(super.params, super.body);
 
   @override
   String get prettyPrint =>
-      "fun (${params.map((e) => e.lexeme).join(", ")}) {\n${body.prettyPrint}\n}";
+      "fun (${params.map((e) => e.lexeme).join(", ")}) {\n${body.prettyPrint}\n}${isExprStatement ? ";" : ""}";
 }
 
 class LoxClass implements Declaration {

@@ -15,11 +15,6 @@ late DloxRunner runtime;
 
 void runFile(String path) {
   run(File(path).readAsStringSync());
-
-  if (hadError) {
-    runtime.exitWCode(65);
-  }
-
   if (hadRuntimeError) {
     runtime.exitWCode(70);
   }
@@ -40,6 +35,7 @@ String format(String code) {
 void run(String code) {
   logger.fine("Running $code");
   var (tokens, program) = parse(code);
+  if (hadError) runtime.exitWCode(65);
   if (program == null) return;
   logger.finer("\n\n*******\nProgram parsed successfully\n*******\n\n");
   logger.fine(program.prettyPrint);

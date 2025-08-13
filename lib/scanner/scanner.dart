@@ -1,3 +1,4 @@
+import 'package:dlox/dlox.dart';
 import 'package:dlox/scanner/token.dart';
 import 'package:logging/logging.dart';
 
@@ -99,6 +100,7 @@ class Scanner {
           identifier();
         } else {
           log.shout("$_line Unexpected character.");
+          hadError = true;
         }
         break;
     }
@@ -158,6 +160,7 @@ class Scanner {
 
     if (isAtTheEnd()) {
       log.shout("$_line Unterminated string");
+      hadError = true;
       return;
     }
 

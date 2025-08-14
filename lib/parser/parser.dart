@@ -199,6 +199,7 @@ class Parser {
         throw _errorRecovery(
             _previous(), "break needs to be inside of a loop.");
       }
+      _consume(TokenType.SEMICOLON, "Expect ';' after break statement.");
       return BreakStatement();
     }
 
@@ -208,7 +209,7 @@ class Parser {
   //TODO during optimazation these can be unrolled into while loops
   ForStatement _for() {
     logger.finer("Parsing for loop");
-    _consume(TokenType.LEFT_PAREN, "Expected '(' after for");
+    _consume(TokenType.LEFT_PAREN, "Expect '(' after for");
     Declaration? initializer;
     if (_match(TokenType.SEMICOLON)) {
       initializer = null;

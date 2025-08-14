@@ -19,7 +19,7 @@ void main(List<String> args) {
 
 void initLoggers() {
   hierarchicalLoggingEnabled = true;
-  Logger.root.level = Level.FINEST;
-  Logger.root.onRecord.listen(
-      (record) => print("[${record.level}]@${record.time}: ${record.message}"));
+  Logger.root.level = Level.INFO;
+  Logger.root.onRecord.listen((record) => print(
+      "${record.loggerName.split(".").last}[${record.level}]@${record.time}: ${record.message}"));
 }

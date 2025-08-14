@@ -1,6 +1,5 @@
 import 'dart:math';
 
-import 'package:dlox/dlox.dart';
 import 'package:dlox/parser/types/types.dart';
 import 'package:dlox/scanner/token.dart';
 import 'package:logging/logging.dart';

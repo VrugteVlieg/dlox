@@ -12,12 +12,7 @@ void main(List<String> args) {
       .map((e) => e is File ? e : null)
       .toList()
     ..retainWhere((e) =>
-        e is File &&
-        (args.isEmpty ||
-            () {
-              print("Checking if ${e.path} is in $testPaths");
-              return testPaths.contains(e.path);
-            }())));
+        e is File && (args.isEmpty || (() => testPaths.contains(e.path))())));
 
   List<(String, String)> testCases = testFiles
       .map((e) =>
@@ -40,8 +35,10 @@ void main(List<String> args) {
   print("Running parse test");
   for (var (testName, testContent) in testCases) {
     print("Running $testName");
-    var (_, nodes) = parse(testContent);
-    if (nodes == null) {
+    parse(testContent);
+    if (hadError) {
+      hadError = false;
+      print("Parse test failed for:\n$testContent");
       failCount++;
     } else {
       passCount++;

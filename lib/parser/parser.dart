@@ -1,10 +1,9 @@
 import 'dart:math';
 
+import 'package:dlox/dlox.dart';
 import 'package:dlox/parser/types/types.dart';
 import 'package:dlox/scanner/token.dart';
 import 'package:logging/logging.dart';
-
-part "utils.dart";
 
 Logger logger = Logger("DloxInterpreter.Parser");
 
@@ -349,7 +348,7 @@ class Parser {
       } else if (expr is Get) {
         return Set(expr.object, expr.name, value);
       }
-      reportError(equals, "Invalid assignment target");
+      runtime.reportParserError(equals, "Invalid assignment target");
     }
 
     // Ternary
@@ -458,7 +457,8 @@ class Parser {
         out.add(_expression());
       }
       if (out.length >= 255) {
-        reportError(_peek(), "Can't have more than 255 arguments.");
+        runtime.reportParserError(
+            _peek(), "Can't have more than 255 arguments.");
       }
     }
     return out;
@@ -503,7 +503,7 @@ class Parser {
   }
 
   ParserException _errorRecovery(Token token, String message) {
-    reportError(token, message);
+    runtime.reportParserError(token, message);
     return ParserException();
   }
 

@@ -1,3 +1,4 @@
+import 'package:dlox/dlox.dart';
 import 'package:dlox/parser/parser.dart';
 import 'package:dlox/parser/tree_walkers/eval/eval.dart';
 import 'package:dlox/parser/types/types.dart';
@@ -28,7 +29,8 @@ void _declare(Token t) {
   log.finer("Declaring ${t.lexeme} at scope depth ${scopes.length}");
   if (scopes.isEmpty) return;
   if (scopes.last.containsKey(t.lexeme)) {
-    reportError(t, "Already a variable with this in this scope");
+    runtime.reportParserError(
+        t, "Already a variable with this name in this scope");
   }
   scopes.last[t.lexeme] = false;
 }
@@ -105,7 +107,8 @@ void _resolve(Resolvable n) {
       break;
     case Variable():
       if (scopes.isNotEmpty && scopes.last[n.id.lexeme] == false) {
-        reportError(n.id, "Can't read local variable in its own initializer");
+        runtime.reportParserError(
+            n.id, "Can't read local variable in its own initializer");
       }
       _resolveLocal(n, n.id);
       break;
@@ -134,12 +137,14 @@ void _resolve(Resolvable n) {
       break;
     case ReturnStatement():
       if (_currentFunction == FunctionType.None) {
-        reportError(n.keyword, "Can't return from top level code");
+        runtime.reportParserError(
+            n.keyword, "Can't return from top level code");
       }
 
       if (n.value != null) {
         if (_currentFunction == FunctionType.Initializer) {
-          reportError(n.keyword, "Can't return a value from an initializer");
+          runtime.reportParserError(
+              n.keyword, "Can't return a value from an initializer");
         }
         _resolve(n.value!);
       }
@@ -192,7 +197,8 @@ void _resolve(Resolvable n) {
       _define(n.id);
 
       if (n.superclass != null && n.id.lexeme == n.superclass!.id.lexeme) {
-        reportError(n.superclass!.id, "A class can't inherit from itself");
+        runtime.reportParserError(
+            n.superclass!.id, "A class can't inherit from itself");
       }
 
       if (n.superclass != null) {
@@ -230,15 +236,18 @@ void _resolve(Resolvable n) {
       break;
     case This():
       if (_currentClass == ClassType.None) {
-        reportError(n.keyword, "Can't use 'this' outside of a class.");
+        runtime.reportParserError(
+            n.keyword, "Can't use 'this' outside of a class.");
       }
       _resolveLocal(n, n.keyword);
       break;
     case Super():
       if (_currentClass == ClassType.None) {
-        reportError(n.keyword, "Can't use 'super' outside of a class.");
+        runtime.reportParserError(
+            n.keyword, "Can't use 'super' outside of a class.");
       } else if (_currentClass == ClassType.Class) {
-        reportError(n.keyword, "Can't use 'super' with no superclass.");
+        runtime.reportParserError(
+            n.keyword, "Can't use 'super' with no superclass.");
       }
       _resolveLocal(n, n.keyword);
   }

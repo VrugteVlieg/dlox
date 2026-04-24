@@ -13,11 +13,11 @@ void _resolveVariable(Expr expr, int depth) => locals[expr] = depth;
 
 enum ClassType { None, Class, Subclass }
 
-ClassType _currentClass = ClassType.None;
+ClassType _currentClass = .None;
 
 enum FunctionType { None, Function, Initializer, Method }
 
-FunctionType _currentFunction = FunctionType.None;
+FunctionType _currentFunction = .None;
 
 List<Map<String, bool>> scopes = [];
 
@@ -122,7 +122,7 @@ void _resolve(Resolvable n) {
         _define(n.id);
       }
 
-      _resolveFunction(n, FunctionType.Function);
+      _resolveFunction(n, .Function);
       break;
     case ExprStatement():
       _resolve(n.expr);
@@ -136,13 +136,13 @@ void _resolve(Resolvable n) {
       _resolve(n.expr);
       break;
     case ReturnStatement():
-      if (_currentFunction == FunctionType.None) {
+      if (_currentFunction == .None) {
         runtime.reportParserError(
             n.keyword, "Can't return from top level code");
       }
 
       if (n.value != null) {
-        if (_currentFunction == FunctionType.Initializer) {
+        if (_currentFunction == .Initializer) {
           runtime.reportParserError(
               n.keyword, "Can't return a value from an initializer");
         }
@@ -192,7 +192,7 @@ void _resolve(Resolvable n) {
       break;
     case LoxClass():
       ClassType enclosingClass = _currentClass;
-      _currentClass = ClassType.Class;
+      _currentClass = .Class;
       _declare(n.id);
       _define(n.id);
 
@@ -202,7 +202,7 @@ void _resolve(Resolvable n) {
       }
 
       if (n.superclass != null) {
-        _currentClass = ClassType.Subclass;
+        _currentClass = .Subclass;
         _resolve(n.superclass!);
         _beginScope();
         scopes.last["super"] = true;
@@ -213,9 +213,9 @@ void _resolve(Resolvable n) {
       log.finest(scopes);
       scopes.last["this"] = true;
       for (var method in n.methods) {
-        FunctionType declaration = FunctionType.Method;
+        FunctionType declaration = .Method;
         if (method.id.lexeme == "init") {
-          declaration = FunctionType.Initializer;
+          declaration = .Initializer;
         }
         _resolveFunction(method, declaration);
       }
@@ -235,17 +235,17 @@ void _resolve(Resolvable n) {
       _resolve(n.value);
       break;
     case This():
-      if (_currentClass == ClassType.None) {
+      if (_currentClass == .None) {
         runtime.reportParserError(
             n.keyword, "Can't use 'this' outside of a class.");
       }
       _resolveLocal(n, n.keyword);
       break;
     case Super():
-      if (_currentClass == ClassType.None) {
+      if (_currentClass == .None) {
         runtime.reportParserError(
             n.keyword, "Can't use 'super' outside of a class.");
-      } else if (_currentClass == ClassType.Class) {
+      } else if (_currentClass == .Class) {
         runtime.reportParserError(
             n.keyword, "Can't use 'super' with no superclass.");
       }

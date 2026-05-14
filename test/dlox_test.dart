@@ -54,7 +54,7 @@ void main(List<String> args) {
     bool pass = true;
     print("Running $testName");
     var (firstTokens, firstNodes!) = parse(testContent);
-    String prettyCode = format(testContent);
+    String prettyCode = format(testContent)!;
     var (secondTokens, secondNodes!) = parse(prettyCode);
     if (firstTokens.length != secondTokens.length) {
       print(

@@ -8,6 +8,8 @@ import "package:dlox/scanner/scanner.dart";
 import "package:dlox/scanner/token.dart";
 import "package:logging/logging.dart";
 
+
+//TODO Make this an instance based class instead of this weird singleton situation
 bool hadError = false;
 bool hadRuntimeError = false;
 Logger logger = Logger("DloxInterpreter");
@@ -22,9 +24,9 @@ void runFile(String path) {
 
 void setRuntime(DloxRunner rt) => runtime = rt;
 
-String format(String code) {
+String? format(String code) {
   var (_, program) = parse(code);
-  return program!.map((e) => e.prettyPrint).join("\n");
+  return program?.map((e) => e.prettyPrint).join("\n");
 }
 
 (List<Token> tokens, List<LoxNode>?) parse(String code) {

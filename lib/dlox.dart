@@ -8,6 +8,8 @@ import "package:dlox/scanner/scanner.dart";
 import "package:dlox/scanner/token.dart";
 import "package:logging/logging.dart";
 
+
+//TODO Make this an instance based class instead of this weird singleton situation
 bool hadError = false;
 bool hadRuntimeError = false;
 Logger logger = Logger("DloxInterpreter");

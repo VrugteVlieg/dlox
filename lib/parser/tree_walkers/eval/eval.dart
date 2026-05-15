@@ -41,7 +41,7 @@ List<Environment> scopeStack = [globalScope];
 Environment get _currentScope => scopeStack.last;
 
 LoxValue _eval(LoxNode n) {
-  log.finer("Evaluating ${n.prettyPrint}(${n.runtimeType})");
+  log.shout("Evaluating ${n.prettyPrint}(${n.runtimeType})");
   return switch (n) {
     Binary() => _binary(n),
     Grouping() => _eval(n.expression),
@@ -60,6 +60,22 @@ LoxValue _eval(LoxNode n) {
         log.finer("Printing ${toPrint.stringify()}(${toPrint.runtimeType})");
         runtime.writeStdOut(toPrint);
       }(),
+    ReadStatement(target:var n) => () {
+      String varName;
+      log.info("Read statement with ${n.runtimeType}");
+      String input = runtime.readStdIn();
+      switch(n) {
+        case VarDecl():
+          varName = n.id.lexeme;
+          _currentScope.define(varName, input);
+        case Variable():
+        varName = n.id.lexeme;
+          locals.containsKey(n)
+        ? _currentScope.assignAt(locals[n]!, n.id, input)
+        : globalScope.assign(n.id, input);
+      }
+      print("Read $input into $varName");
+    }(),
     VarDecl() => _currentScope.define(n.id.lexeme, n.expr.map(_eval)),
     Variable() => _lookupVariable(n.id, n),
     Assignment() => locals.containsKey(n)

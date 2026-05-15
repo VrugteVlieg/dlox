@@ -249,5 +249,12 @@ void _resolve(Resolvable n) {
             n.keyword, "Can't use 'super' with no superclass.");
       }
       _resolveLocal(n, n.keyword);
+    case ReadStatement(target: var n):
+        switch(n) {
+           case VarDecl():
+            _resolve(n);
+          case Variable():
+            _resolve(n);
+        }
   }
 }

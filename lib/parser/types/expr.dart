@@ -115,7 +115,7 @@ class Ternary extends Expr {
       "${condition.prettyPrint} ? ${trueCase.prettyPrint} : ${falseCase.prettyPrint}";
 }
 
-class Variable extends Expr {
+class Variable extends Expr implements ReadTarget {
   final Token id;
 
   const Variable(this.id);

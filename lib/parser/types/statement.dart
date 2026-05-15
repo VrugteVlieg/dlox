@@ -20,6 +20,14 @@ class PrintStatement extends Statement {
   String get prettyPrint => "print ${expr.prettyPrint};";
 }
 
+class ReadStatement extends Statement {
+  final ReadTarget target;
+  const ReadStatement(this.target);
+
+  @override
+  String get prettyPrint => "read ${target.prettyPrint};";
+}
+
 class ReturnStatement extends Statement {
   final Expr? value;
   final Token keyword;

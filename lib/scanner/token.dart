@@ -30,6 +30,7 @@ const Map<String, TokenType> keywordMappings = {
   "var": TokenType.VAR,
   "while": TokenType.WHILE,
   "break": TokenType.BREAK,
+  "read": TokenType.READ
 };
 
 enum TokenType {
@@ -74,6 +75,7 @@ enum TokenType {
   NIL,
   OR,
   PRINT,
+  READ,
   RETURN,
   SUPER,
   THIS,

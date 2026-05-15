@@ -1,0 +1,4 @@
+print "Enter a value of a";
+read var a;
+print "a is " + a;
+print a + 3;

@@ -61,6 +61,9 @@ class DefaultRunner implements DloxRunner {
       _l.shout("${token.line} at ${token.lexeme} $message");
     }
   }
+
+  @override
+  String readStdIn() => stdin.readLineSync() ?? "";
 }
 
 void printUsage() {

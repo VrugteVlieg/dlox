@@ -1,0 +1,5 @@
+var a;
+print "The initial value of a is " + a;
+print "Enter a value of a";
+read a;
+print "The new value of a is " + a;

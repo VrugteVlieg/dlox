@@ -177,6 +177,10 @@ class Parser {
       return _printStatement();
     }
 
+    if (_match(TokenType.READ)) {
+      return _readStatement();
+    }
+
     if (_match(TokenType.LEFT_BRACE)) {
       return BlockStatement(_block());
     }
@@ -311,6 +315,17 @@ class Parser {
     logger.finer("ToPrint: ${expr.prettyPrint}");
     _consume(TokenType.SEMICOLON, "Expect ';' after value.");
     return PrintStatement(expr);
+  }
+
+  ReadStatement _readStatement() {
+    logger.finer("Parsing read statement");
+    final bool isDeclRead = _match(TokenType.VAR);
+    _consume(.IDENTIFIER, "Expected variable name or declaration after read");
+    Token id = _previous();
+    ReadTarget target = isDeclRead ? VarDecl(id, null) : Variable(id);
+    logger.finer("Reading into ${target.prettyPrint}");
+    _consume(TokenType.SEMICOLON, "Expect ';' after value.");
+    return ReadStatement(target);
   }
 
   ExprStatement _exprStatement() {
@@ -551,6 +566,7 @@ class Parser {
             TokenType.IF ||
             TokenType.WHILE ||
             TokenType.PRINT ||
+            TokenType.READ ||
             TokenType.RETURN:
           return;
         default:

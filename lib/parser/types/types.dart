@@ -43,7 +43,7 @@ sealed class LoxFunc extends LoxNode implements Declaration {
   const LoxFunc(this.params, this.body);
 }
 
-class VarDecl extends Declaration {
+class VarDecl extends Declaration implements ReadTarget {
   final Token id;
   final Expr? expr;
   const VarDecl(this.id, this.expr);
@@ -98,3 +98,6 @@ class LoxClass implements Declaration {
             (e) => e.prettyPrint,
           ).join("\n\n")}\n}";
 }
+
+
+sealed class ReadTarget extends LoxNode  {}

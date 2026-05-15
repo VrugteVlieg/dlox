@@ -20,11 +20,14 @@ class Parser {
   ///
   /// Advances the token stream if a `matchable` is found
   bool _match(Object matchable) {
-    List<TokenType> toMatch =
-        matchable is List<TokenType> ? matchable : [matchable as TokenType];
+    List<TokenType> toMatch = matchable is List<TokenType>
+        ? matchable
+        : [matchable as TokenType];
     String surroundingTokens = tokens
-        .sublist(max(_current, 0),
-            min(tokens.length - 1, _current + (toMatch.length + 2)))
+        .sublist(
+          max(_current, 0),
+          min(tokens.length - 1, _current + (toMatch.length + 2)),
+        )
         .map((t) => t.type)
         .join("->");
     logger.finest("Matching $toMatch in [$surroundingTokens]");
@@ -39,12 +42,8 @@ class Parser {
     return false;
   }
 
-  List<LoxNode>? parse() {
-    try {
-      return _parseLox();
-    } on ParserException {
-      return null;
-    }
+  List<LoxNode> parse() {
+    return _parseLox();
   }
 
   Token _advance() {
@@ -87,8 +86,10 @@ class Parser {
           return _function("function");
         } else {
           LambdaFunc out = _lambdaFunction()..isExprStatement = true;
-          _consume(TokenType.SEMICOLON,
-              "Expect ';' after lambda expresison statement");
+          _consume(
+            TokenType.SEMICOLON,
+            "Expect ';' after lambda expresison statement",
+          );
           return out;
         }
       }
@@ -108,7 +109,9 @@ class Parser {
     List<Token> params = _parameters();
     logger.finer("Function Params: ${params.map((e) => e.lexeme).join(", ")}");
     _consume(
-        TokenType.RIGHT_PAREN, "Expected ')' after function parameter list");
+      TokenType.RIGHT_PAREN,
+      "Expected ')' after function parameter list",
+    );
 
     _consume(TokenType.LEFT_BRACE, "Expected '{' at start of block");
     List<Declaration> body = _block();
@@ -126,16 +129,22 @@ class Parser {
       out.add(_previous());
     }
     while (_match(TokenType.COMMA) && !_isAtEnd()) {
-      out.add(_consume(TokenType.IDENTIFIER,
-          "Expected identifier after ',' in function parameter list"));
+      out.add(
+        _consume(
+          TokenType.IDENTIFIER,
+          "Expected identifier after ',' in function parameter list",
+        ),
+      );
     }
 
     return out;
   }
 
   Declaration _varDecl() {
-    Token id =
-        _consume(TokenType.IDENTIFIER, "Expected identifier after 'var'.");
+    Token id = _consume(
+      TokenType.IDENTIFIER,
+      "Expected identifier after 'var'.",
+    );
     Expr? expr;
     if (_match(TokenType.EQUAL)) {
       expr = _expression();
@@ -196,7 +205,9 @@ class Parser {
       logger.finer("Parsing break statement, loop depth: $_loopDepth");
       if (_loopDepth == 0) {
         throw _errorRecovery(
-            _previous(), "break needs to be inside of a loop.");
+          _previous(),
+          "break needs to be inside of a loop.",
+        );
       }
       _consume(TokenType.SEMICOLON, "Expect ';' after break statement.");
       return BreakStatement();
@@ -326,7 +337,9 @@ class Parser {
     List<Token> params = _parameters();
     logger.finer("Function Params: ${params.map((e) => e.lexeme).join(", ")}");
     _consume(
-        TokenType.RIGHT_PAREN, "Expected ')' after function parameter list");
+      TokenType.RIGHT_PAREN,
+      "Expected ')' after function parameter list",
+    );
 
     _consume(TokenType.LEFT_BRACE, "Expected '{' at start of block");
     List<Declaration> body = _block();
@@ -384,7 +397,7 @@ class Parser {
       TokenType.LESS,
       TokenType.LESS_EQUAL,
       TokenType.AND,
-      TokenType.OR
+      TokenType.OR,
     ])) {
       Token operator = _previous();
       Expr right = _term();
@@ -439,8 +452,10 @@ class Parser {
       if (_match(TokenType.LEFT_PAREN)) {
         out = _finishCall(out);
       } else if (_match(TokenType.DOT)) {
-        Token name =
-            _consume(TokenType.IDENTIFIER, "Expect property name afte '.'.");
+        Token name = _consume(
+          TokenType.IDENTIFIER,
+          "Expect property name afte '.'.",
+        );
         out = Get(out, name);
       } else {
         break;
@@ -458,7 +473,9 @@ class Parser {
       }
       if (out.length >= 255) {
         runtime.reportParserError(
-            _peek(), "Can't have more than 255 arguments.");
+          _peek(),
+          "Can't have more than 255 arguments.",
+        );
       }
     }
     return out;
@@ -469,10 +486,7 @@ class Parser {
     if (_match(TokenType.TRUE)) return Literal(true);
     if (_match(TokenType.FALSE)) return Literal(false);
     if (_match(TokenType.NIL)) return Literal(null);
-    if (_match([
-      TokenType.NUMBER,
-      TokenType.STRING,
-    ])) {
+    if (_match([TokenType.NUMBER, TokenType.STRING])) {
       return Literal(_previous().literal!);
     }
 
@@ -494,8 +508,10 @@ class Parser {
     if (_match(TokenType.SUPER)) {
       Token keyword = _previous();
       _consume(TokenType.DOT, "Expect '.' after 'super'");
-      Token method =
-          _consume(TokenType.IDENTIFIER, "Expect superclass methods name");
+      Token method = _consume(
+        TokenType.IDENTIFIER,
+        "Expect superclass methods name",
+      );
       return Super(keyword, method);
     }
 
@@ -529,13 +545,13 @@ class Parser {
 
       switch (_peek().type) {
         case TokenType.CLASS ||
-              TokenType.FUN ||
-              TokenType.VAR ||
-              TokenType.FOR ||
-              TokenType.IF ||
-              TokenType.WHILE ||
-              TokenType.PRINT ||
-              TokenType.RETURN:
+            TokenType.FUN ||
+            TokenType.VAR ||
+            TokenType.FOR ||
+            TokenType.IF ||
+            TokenType.WHILE ||
+            TokenType.PRINT ||
+            TokenType.RETURN:
           return;
         default:
           _advance();

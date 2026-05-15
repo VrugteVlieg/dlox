@@ -53,9 +53,9 @@ void main(List<String> args) {
   for (var (testName, testContent) in testCases) {
     bool pass = true;
     print("Running $testName");
-    var (firstTokens, firstNodes!) = parse(testContent);
-    String prettyCode = format(testContent)!;
-    var (secondTokens, secondNodes!) = parse(prettyCode);
+    var (firstTokens, firstNodes) = parse(testContent);
+    String prettyCode = format(testContent);
+    var (secondTokens, secondNodes) = parse(prettyCode);
     if (firstTokens.length != secondTokens.length) {
       print(
           "First pass token count ${firstTokens.length} != Second pass token count ${secondTokens.length}");

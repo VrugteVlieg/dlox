@@ -28,69 +28,62 @@ LoxValue _lookupVariable(Token name, Expr expr) {
   return out;
 }
 
-void execute(List<LoxNode> program) {
-  program.forEach(_eval);
+Future<void> execute(List<LoxNode> program) async {
+  for (var statement in program) {
+    await _eval(statement);
+  }
 }
 
 typedef LoxValue = Object?;
 
-final Environment globalScope =
-    Environment(scopeName: "GlobalScope", natives: {"clock": Clock()});
+final Environment globalScope = Environment(
+  scopeName: "GlobalScope",
+  natives: {"clock": Clock()},
+);
 
 List<Environment> scopeStack = [globalScope];
 Environment get _currentScope => scopeStack.last;
 
-LoxValue _eval(LoxNode n) {
+Future<LoxValue> _eval(LoxNode n) async {
   log.shout("Evaluating ${n.prettyPrint}(${n.runtimeType})");
   return switch (n) {
     Binary() => _binary(n),
-    Grouping() => _eval(n.expression),
+    Grouping() => await _eval(n.expression),
     Literal() => n.value,
-    Unary() => switch ((n.operator.type, _eval(n.operand))) {
-        (TokenType.BANG, bool val) => !val.isTruthy,
-        (TokenType.MINUS, double val) => -1 * val,
-        (var t, var val) => throw RuntimeError(n.operator,
-            "Unsupported Unary operation $t $val(${val.runtimeType})"),
-      },
+    Unary() => switch ((n.operator.type, await _eval(n.operand))) {
+      (TokenType.BANG, bool val) => !val.isTruthy,
+      (TokenType.MINUS, double val) => -1 * val,
+      (var t, var val) => throw RuntimeError(
+        n.operator,
+        "Unsupported Unary operation $t $val(${val.runtimeType})",
+      ),
+    },
     Ternary() =>
-      _eval(n.condition).isTruthy ? _eval(n.trueCase) : _eval(n.falseCase),
-    ExprStatement() => _eval(n.expr),
-    PrintStatement() => () {
-        Object? toPrint = _eval(n.expr);
-        log.finer("Printing ${toPrint.stringify()}(${toPrint.runtimeType})");
-        runtime.writeStdOut(toPrint);
-      }(),
-    ReadStatement(target:var n) => () {
-      String varName;
-      log.info("Read statement with ${n.runtimeType}");
-      String input = runtime.readStdIn();
-      switch(n) {
-        case VarDecl():
-          varName = n.id.lexeme;
-          _currentScope.define(varName, input);
-        case Variable():
-        varName = n.id.lexeme;
-          locals.containsKey(n)
-        ? _currentScope.assignAt(locals[n]!, n.id, input)
-        : globalScope.assign(n.id, input);
-      }
-      print("Read $input into $varName");
-    }(),
-    VarDecl() => _currentScope.define(n.id.lexeme, n.expr.map(_eval)),
+      (await _eval(n.condition)).isTruthy ? await _eval(n.trueCase) : await _eval(n.falseCase),
+    ExprStatement() => await _eval(n.expr),
+    PrintStatement() => await _print(n),
+    ReadStatement() => await _read(n),
+    VarDecl() => _currentScope.define(n.id.lexeme, n.expr.map((n) async => await _eval(n))),
     Variable() => _lookupVariable(n.id, n),
-    Assignment() => locals.containsKey(n)
-        ? _currentScope.assignAt(locals[n]!, n.id, _eval(n.value))
-        : globalScope.assign(n.id, _eval(n.value)),
-    BlockStatement() => _executeBlock(n.decls,
-        Environment(enclosing: _currentScope, scopeName: "Anonymous scope")),
+    Assignment() =>
+      locals.containsKey(n)
+          ? _currentScope.assignAt(locals[n]!, n.id, await _eval(n.value))
+          : globalScope.assign(n.id, await _eval(n.value)),
+    BlockStatement() => _executeBlock(
+      n.decls,
+      Environment(enclosing: _currentScope, scopeName: "Anonymous scope"),
+    ),
     IfStatement() => _if(n),
     LoopStatement() => _loopStatement(n),
     BreakStatement() => throw n,
     Call() => _call(n),
     FunctionDeclaration() => _funcDecl(n),
     ReturnStatement() => _returnStatement(n),
-    LambdaFunc() =>
-      LoxFunction(LambdaFunc(n.params, n.body), _currentScope, false),
+    LambdaFunc() => LoxFunction(
+      LambdaFunc(n.params, n.body),
+      _currentScope,
+      false,
+    ),
     LoxClass() => _classDecl(n),
     Get() => _getExpr(n),
     Set() => _setExpr(n),
@@ -114,20 +107,20 @@ LoxValue _superExpr(Super s) {
   return out;
 }
 
-LoxValue _setExpr(Set s) {
-  LoxValue object = _eval(s.object);
+Future<LoxValue> _setExpr(Set s) async {
+  LoxValue object = await _eval(s.object);
   if (object is! LoxInstance) {
     throw RuntimeError(s.name, "Only instances have fields");
   }
 
-  LoxValue val = _eval(s.value);
+  LoxValue val = await _eval(s.value);
   object.set(s.name, val);
   return null;
 }
 
-LoxValue _getExpr(Get g) {
+Future<LoxValue> _getExpr(Get g) async {
   log.finer("Eval Get ${g.prettyPrint}");
-  LoxValue val = _eval(g.object);
+  LoxValue val = await _eval(g.object);
   log.finer("${val.runtimeType}${val.stringify()}${val.toString()}");
   if (val is LoxInstance) {
     return val.get(g.name);
@@ -141,14 +134,16 @@ LoxValue _funcDecl(FunctionDeclaration f) {
   return null;
 }
 
-LoxValue _classDecl(LoxClass c) {
+Future<LoxValue> _classDecl(LoxClass c) async {
   LoxValue superclass;
   log.finest("Evaluating ${c.prettyPrint}");
   if (c.superclass != null) {
-    superclass = _eval(c.superclass!);
+    superclass = await _eval(c.superclass!);
     if (superclass is! LoxKlass) {
-      throw RuntimeError(c.superclass!.id,
-          "Superclass must be a class is ${superclass.runtimeType}");
+      throw RuntimeError(
+        c.superclass!.id,
+        "Superclass must be a class is ${superclass.runtimeType}",
+      );
     }
     log.finest("${c.id.lexeme} has ${superclass.name} as super class");
   }
@@ -161,11 +156,17 @@ LoxValue _classDecl(LoxClass c) {
   }
   Map<String, LoxFunction> methods = {};
   for (var method in c.methods) {
-    methods[method.id.lexeme] =
-        LoxFunction(method, _currentScope, method.id.lexeme == "init");
+    methods[method.id.lexeme] = LoxFunction(
+      method,
+      _currentScope,
+      method.id.lexeme == "init",
+    );
   }
-  LoxKlass klass = LoxKlass(c.id.lexeme, methods,
-      superclass: (superclass == null) ? null : superclass as LoxKlass);
+  LoxKlass klass = LoxKlass(
+    c.id.lexeme,
+    methods,
+    superclass: (superclass == null) ? null : superclass as LoxKlass,
+  );
   if (superclass != null) {
     scopeStack.last = _currentScope.enclosing!;
   }
@@ -173,14 +174,16 @@ LoxValue _classDecl(LoxClass c) {
   return null;
 }
 
-LoxValue _call(Call c) {
-  LoxValue callee = _eval(c.callee);
-  List<LoxValue> args = c.args.map(_eval).toList();
+Future<LoxValue> _call(Call c) async {
+  LoxValue callee = await _eval(c.callee);
+  List<LoxValue> args = c.args.map((a) async => await _eval(a)).toList();
   if (callee is! LoxCallable) {
     throw RuntimeError(c.paren, "Can only call functions and classes.");
   } else if (callee.arity() != args.length) {
-    throw RuntimeError(c.paren,
-        "Expected ${callee.arity()} arguments but got ${args.length}.");
+    throw RuntimeError(
+      c.paren,
+      "Expected ${callee.arity()} arguments but got ${args.length}.",
+    );
   } else {
     return callee.call(_currentScope, args);
   }
@@ -190,93 +193,136 @@ LoxValue _loopStatement(LoopStatement l) {
   try {
     return switch (l) {
       WhileStatement() => _while(l),
-      ForStatement() => _for(l)
+      ForStatement() => _for(l),
     };
   } on BreakStatement {
     return null;
   }
 }
 
-LoxValue _for(ForStatement f) {
-  for (f.initializer.map(_eval);
-      f.condition.map(_eval).isTruthy;
-      f.increment.map(_eval)) {
-    _eval(f.body);
+Future<LoxValue> _for(ForStatement f) async {
+  for (
+    f.initializer.map((i) async => await _eval(i));
+    f.condition.map((c) async => await _eval(c)).isTruthy;
+    f.increment.map((i) async => await _eval(i))
+  ) {
+    await _eval(f.body);
   }
   return null;
 }
 
-LoxValue _binary(Binary b) {
+Future<LoxValue> _binary(Binary b) async {
   switch (b.operator.type) {
     case TokenType.AND:
-      LoxValue left = _eval(b.left);
-      return left.isTruthy ? _eval(b.right) : left;
+      LoxValue left = await _eval(b.left);
+      return left.isTruthy ? await _eval(b.right) : left;
     case TokenType.OR:
-      LoxValue left = _eval(b.left);
-      return left.isTruthy ? left : _eval(b.right);
+      LoxValue left = await _eval(b.left);
+      return left.isTruthy ? left : await _eval(b.right);
     default:
-      return switch ((_eval(b.left), b.operator.type, _eval(b.right))) {
-        (double l, TokenType.SLASH, double r) => r == 0
-            ? throw RuntimeError(b.operator, "Division by zero is not cool")
-            : l / r,
+      return switch ((await _eval(b.left), b.operator.type, await _eval(b.right))) {
+        (double l, TokenType.SLASH, double r) =>
+          r == 0
+              ? throw RuntimeError(b.operator, "Division by zero is not cool")
+              : l / r,
         (double l, TokenType.STAR, double r) => l * r,
         (double l, TokenType.PLUS, double r) => l + r,
         (double l, TokenType.MINUS, double r) => l - r,
         (String l, TokenType.PLUS, var r) => "$l${r.stringify()}",
         (var l, TokenType.PLUS, String r) => "${l.stringify()}$r",
-        (String l, TokenType.STAR, double r) =>
-          List.filled(r.floor(), l).join(),
-        (double l, TokenType.STAR, String r) =>
-          List.filled(l.floor(), r).join(),
+        (String l, TokenType.STAR, double r) => List.filled(
+          r.floor(),
+          l,
+        ).join(),
+        (double l, TokenType.STAR, String r) => List.filled(
+          l.floor(),
+          r,
+        ).join(),
         (var l, TokenType.BANG_EQUAL, var r) => !isEqual(l, r),
         (var l, TokenType.EQUAL_EQUAL, var r) => isEqual(l, r),
         (double l, TokenType.GREATER, double r) => l > r,
         (double l, TokenType.GREATER_EQUAL, double r) => l >= r,
         (double l, TokenType.LESS, double r) => l < r,
         (double l, TokenType.LESS_EQUAL, double r) => l <= r,
-        (var l, var t, var r) => throw RuntimeError(b.operator,
-            "Unsupport operation $l(${l.runtimeType}) $t $r(${r.runtimeType})"),
+        (var l, var t, var r) => throw RuntimeError(
+          b.operator,
+          "Unsupport operation $l(${l.runtimeType}) $t $r(${r.runtimeType})",
+        ),
       };
   }
 }
 
-LoxValue _while(WhileStatement w) {
-  while (_eval(w.condition).isTruthy) {
-    _eval(w.body);
+Future<LoxValue> _while(WhileStatement w) async {
+  while ((await _eval(w.condition)).isTruthy) {
+    await _eval(w.body);
   }
   return null;
 }
 
-LoxValue _if(IfStatement n) {
-  if (_eval(n.condition).isTruthy) {
-    return _eval(n.ifTrue);
+Future<LoxValue> _read(ReadStatement n) async {
+  String varName;
+  log.info("Read statement with ${n.target.runtimeType}");
+  String input = await runtime.readStdIn();
+  log.info("Read $input in func");
+  switch (n.target) {
+    case VarDecl(:var id):
+    log.info("Vardecl");
+      varName = id.lexeme;
+      _currentScope.define(varName, input);
+    case Variable(:var id):
+    log.info("Variable");
+      varName = id.lexeme;
+      locals.containsKey(n.target)
+          ? _currentScope.assignAt(locals[n.target]!, id, input)
+          : globalScope.assign(id, input);
+  }
+  log.info("Read $input into $varName");
+  return null;
+}
+
+Future<LoxValue> _print(PrintStatement n) async {
+      Object? toPrint = await _eval(n.expr);
+      log.finer("Printing ${toPrint.stringify()}(${toPrint.runtimeType})");
+      runtime.writeStdOut(toPrint);
+      return null;
+    }
+
+Future<LoxValue> _if(IfStatement n)async {
+  if ((await _eval(n.condition)).isTruthy) {
+    return await _eval(n.ifTrue);
   } else if (n.ifFalse != null) {
-    return _eval(n.ifFalse!);
+    return await _eval(n.ifFalse!);
   }
   return null;
 }
 
-LoxValue _executeBlock(
-    List<Declaration> body, Environment executionEnvironment) {
+Future<LoxValue> _executeBlock(
+  List<Declaration> body,
+  Environment executionEnvironment,
+) async {
   scopeStack.add(executionEnvironment);
   for (Declaration stmt in body) {
-    _eval(stmt);
+    await _eval(stmt);
   }
   scopeStack.removeLast();
   return null;
 }
 
-LoxValue _returnStatement(ReturnStatement r) {
+Future<LoxValue> _returnStatement(ReturnStatement r) async {
   LoxValue value;
   if (r.value != null) {
-    value = _eval(r.value!);
+    value = await _eval(r.value!);
   }
   log.finer("Returning ${value.stringify()}");
   throw Return(value);
 }
 
 extension on Object? {
-  bool get isTruthy => switch (this) { null => false, bool b => b, _ => true };
+  bool get isTruthy => switch (this) {
+    null => false,
+    bool b => b,
+    _ => true,
+  };
 }
 
 extension<T> on T? {
@@ -331,7 +377,8 @@ class LoxInstance {
         return method.bind(this);
       } else {
         log.finer(
-            "Undefined property access ${name.lexeme} on $this, defined properties(${fields.length}): [${fields.keys.join(", ")}]");
+          "Undefined property access ${name.lexeme} on $this, defined properties(${fields.length}): [${fields.keys.join(", ")}]",
+        );
         return throw RuntimeError(name, "Undefined property ${name.lexeme}.");
       }
     }
@@ -366,9 +413,9 @@ class LoxFunction implements LoxCallable {
   const LoxFunction(this.declaration, this.declScope, this.isInitializer);
 
   String get _id => switch (declaration) {
-        FunctionDeclaration(id: var id) => id.lexeme,
-        LambdaFunc() => "lambda",
-      };
+    FunctionDeclaration(id: var id) => id.lexeme,
+    LambdaFunc() => "lambda",
+  };
 
   /// Create a wrapping scope containing a reference `instance` under `this`
   LoxFunction bind(LoxInstance instance) {
@@ -382,8 +429,10 @@ class LoxFunction implements LoxCallable {
 
   @override
   LoxValue call(Environment env, List<LoxValue?> args) {
-    Environment functionScope =
-        Environment(enclosing: declScope, scopeName: "$_id scope");
+    Environment functionScope = Environment(
+      enclosing: declScope,
+      scopeName: "$_id scope",
+    );
     for (var (i, e) in declaration.params.indexed) {
       functionScope.define(e.lexeme, args[i]);
     }

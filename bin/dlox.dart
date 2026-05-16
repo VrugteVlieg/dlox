@@ -8,7 +8,7 @@ final DefaultRunner runtime = DefaultRunner();
 
 Logger _l = Logger("dlox");
 
-void main(List<String> cliArgs) {
+Future<void> main(List<String> cliArgs) async {
   List<String> args = cliArgs.toList();
   initLoggers();
   dlox.setRuntime(runtime);
@@ -19,13 +19,13 @@ void main(List<String> cliArgs) {
   } else if (args.length == 2) {
     try {
       CommandArgsPair toRun = Commands.parseFromCli(args);
-      toRun.$1.execute(toRun.$2);
+      await toRun.$1.execute(toRun.$2);
     } on String catch (e) {
       print("Error parsing cli commands: $e");
       printUsage();
     }
   } else {
-    dlox.runPrompt();
+    await dlox.runPrompt();
   }
 }
 
@@ -63,7 +63,11 @@ class DefaultRunner implements DloxRunner {
   }
 
   @override
-  String readStdIn() => stdin.readLineSync() ?? "";
+  Future<String> readStdIn() async {
+    String value = stdin.readLineSync() ?? "";
+    _l.info("Read $value");
+    return Future.syncValue(value);
+  }
 }
 
 void printUsage() {
@@ -93,7 +97,7 @@ enum Commands {
     }
   }
 
-  Object? execute(Object? args) {
+  Future<Object?> execute(Object? args) {
     switch (this) {
       case Commands.Run:
         String fileToRun = args as String;
@@ -107,7 +111,7 @@ enum Commands {
               : toPrint,
         );
     }
-    return null;
+    return Future.value(null);
   }
 
   static CommandArgsPair parseFromCli(List<String> args) {

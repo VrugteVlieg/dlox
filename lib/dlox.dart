@@ -17,8 +17,8 @@ late DloxRunner runtime;
 const int ScannerErrorExit = 65;
 const int FileNotFoundExit = 70;
 
-void runFile(String path) {
-  run(File(path).readAsStringSync());
+Future<void> runFile(String path) async {
+  await run(File(path).readAsStringSync());
   if (hadRuntimeError) {
     runtime.exitWCode(FileNotFoundExit);
   }
@@ -37,7 +37,7 @@ String format(String code) {
   return (tokens, Parser(tokens).parse());
 }
 
-void run(String code) {
+Future<void> run(String code) async {
   logger.fine("Running $code");
   var (tokens, program) = parse(code);
   if (hadError) runtime.exitWCode(ScannerErrorExit); //TODO We should encode the error in the return type of parse instead of using a flag that gets set, the parse can maintain an internal flag but that should not leak out like this
@@ -49,20 +49,20 @@ void run(String code) {
   if (hadError) return;
   try {
     logger.finer("\n\n*******\nResolved variables: $locals\n*******\n\n");
-    execute(program);
+    await execute(program);
   } on RuntimeError catch (e) {
     print("${e.message}\n[line ${e.token.line}]");
     hadRuntimeError = true;
   }
 }
 
-void runPrompt() {
+Future<void> runPrompt() async {
   String? line;
   while (true) {
     print("> ");
     line = stdin.readLineSync();
     if (line == null) continue;
-    run(line);
+    await run(line);
     hadError = false;
   }
 }

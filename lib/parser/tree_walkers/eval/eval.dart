@@ -389,7 +389,6 @@ class LoxInstance {
   }
 }
 
-//TODO this can probs be replace by just throwing the LoxValue
 class Return {
   final LoxValue value;
 

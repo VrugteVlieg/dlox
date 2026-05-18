@@ -38,7 +38,6 @@ class ReturnStatement extends Statement {
       "return${value == null ? "" : " ${value?.prettyPrint ?? ""}"};";
 }
 
-//TODO not sure if this is even needed, caused a bunch of kak during resolution
 class BlockStatement extends Statement {
   final List<Declaration> decls;
   const BlockStatement(this.decls);

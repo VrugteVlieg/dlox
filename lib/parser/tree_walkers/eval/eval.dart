@@ -51,8 +51,8 @@ Future<LoxValue> _eval(LoxNode n) async {
     Grouping() => await _eval(n.expression),
     Literal() => n.value,
     Unary() => switch ((n.operator.type, await _eval(n.operand))) {
-      (TokenType.BANG, bool val) => !val.isTruthy,
-      (TokenType.MINUS, double val) => -1 * val,
+      (.BANG, bool val) => !val.isTruthy,
+      (.MINUS, double val) => -1 * val,
       (var t, var val) => throw RuntimeError(
         n.operator,
         "Unsupported Unary operation $t $val(${val.runtimeType})",
@@ -213,37 +213,37 @@ Future<LoxValue> _for(ForStatement f) async {
 
 Future<LoxValue> _binary(Binary b) async {
   switch (b.operator.type) {
-    case TokenType.AND:
+    case .AND:
       LoxValue left = await _eval(b.left);
       return left.isTruthy ? await _eval(b.right) : left;
-    case TokenType.OR:
+    case .OR:
       LoxValue left = await _eval(b.left);
       return left.isTruthy ? left : await _eval(b.right);
     default:
       return switch ((await _eval(b.left), b.operator.type, await _eval(b.right))) {
-        (double l, TokenType.SLASH, double r) =>
+        (double l, .SLASH, double r) =>
           r == 0
               ? throw RuntimeError(b.operator, "Division by zero is not cool")
               : l / r,
-        (double l, TokenType.STAR, double r) => l * r,
-        (double l, TokenType.PLUS, double r) => l + r,
-        (double l, TokenType.MINUS, double r) => l - r,
-        (String l, TokenType.PLUS, var r) => "$l${r.stringify()}",
-        (var l, TokenType.PLUS, String r) => "${l.stringify()}$r",
-        (String l, TokenType.STAR, double r) => List.filled(
+        (double l, .STAR, double r) => l * r,
+        (double l, .PLUS, double r) => l + r,
+        (double l, .MINUS, double r) => l - r,
+        (String l, .PLUS, var r) => "$l${r.stringify()}",
+        (var l, .PLUS, String r) => "${l.stringify()}$r",
+        (String l, .STAR, double r) => List.filled(
           r.floor(),
           l,
         ).join(),
-        (double l, TokenType.STAR, String r) => List.filled(
+        (double l, .STAR, String r) => List.filled(
           l.floor(),
           r,
         ).join(),
-        (var l, TokenType.BANG_EQUAL, var r) => !isEqual(l, r),
-        (var l, TokenType.EQUAL_EQUAL, var r) => isEqual(l, r),
-        (double l, TokenType.GREATER, double r) => l > r,
-        (double l, TokenType.GREATER_EQUAL, double r) => l >= r,
-        (double l, TokenType.LESS, double r) => l < r,
-        (double l, TokenType.LESS_EQUAL, double r) => l <= r,
+        (var l, .BANG_EQUAL, var r) => !isEqual(l, r),
+        (var l, .EQUAL_EQUAL, var r) => isEqual(l, r),
+        (double l, .GREATER, double r) => l > r,
+        (double l, .GREATER_EQUAL, double r) => l >= r,
+        (double l, .LESS, double r) => l < r,
+        (double l, .LESS_EQUAL, double r) => l <= r,
         (var l, var t, var r) => throw RuntimeError(
           b.operator,
           "Unsupport operation $l(${l.runtimeType}) $t $r(${r.runtimeType})",

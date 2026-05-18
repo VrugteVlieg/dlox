@@ -55,7 +55,7 @@ class DefaultRunner implements DloxRunner {
   @override
   void reportParserError(Token token, String message) {
     parserErrorEncountered = true;
-    if (token.type == TokenType.EOF) {
+    if (token.type == .EOF) {
       _l.shout("${token.line} at the end $message");
     } else {
       _l.shout("${token.line} at ${token.lexeme} $message");

@@ -53,7 +53,7 @@ class Parser {
 
   bool _check(TokenType type) => _isAtEnd() ? false : _peek().type == type;
 
-  bool _isAtEnd() => _peek().type == TokenType.EOF;
+  bool _isAtEnd() => _peek().type == .EOF;
 
   Token _peek() => tokens[_current];
 
@@ -103,17 +103,14 @@ class Parser {
 
   FunctionDeclaration _function(String kind) {
     logger.finer("Parsing $kind function");
-    Token id = _consume(TokenType.IDENTIFIER, "Expected $kind name");
+    Token id = _consume(.IDENTIFIER, "Expected $kind name");
     logger.finer("Function ID: ${id.lexeme}");
-    _consume(TokenType.LEFT_PAREN, "Expected '(' after $kind name");
+    _consume(.LEFT_PAREN, "Expected '(' after $kind name");
     List<Token> params = _parameters();
     logger.finer("Function Params: ${params.map((e) => e.lexeme).join(", ")}");
-    _consume(
-      TokenType.RIGHT_PAREN,
-      "Expected ')' after function parameter list",
-    );
+    _consume(.RIGHT_PAREN, "Expected ')' after function parameter list");
 
-    _consume(TokenType.LEFT_BRACE, "Expected '{' at start of block");
+    _consume(.LEFT_BRACE, "Expected '{' at start of block");
     List<Declaration> body = _block();
     logger.finer("Body: ${body.prettyPrint}");
     if (kind == "method") {
@@ -131,7 +128,7 @@ class Parser {
     while (_match(TokenType.COMMA) && !_isAtEnd()) {
       out.add(
         _consume(
-          TokenType.IDENTIFIER,
+          .IDENTIFIER,
           "Expected identifier after ',' in function parameter list",
         ),
       );
@@ -141,32 +138,29 @@ class Parser {
   }
 
   Declaration _varDecl() {
-    Token id = _consume(
-      TokenType.IDENTIFIER,
-      "Expected identifier after 'var'.",
-    );
+    Token id = _consume(.IDENTIFIER, "Expected identifier after 'var'.");
     Expr? expr;
     if (_match(TokenType.EQUAL)) {
       expr = _expression();
     }
-    _consume(TokenType.SEMICOLON, "Expected ';' after variable declaration");
+    _consume(.SEMICOLON, "Expected ';' after variable declaration");
     return VarDecl(id, expr);
   }
 
   LoxClass _classDeclaration() {
-    Token id = _consume(TokenType.IDENTIFIER, "Expect class name");
+    Token id = _consume(.IDENTIFIER, "Expect class name");
     Variable? superclass;
     if (_match(TokenType.LESS)) {
-      _consume(TokenType.IDENTIFIER, "Expect superclass name");
+      _consume(.IDENTIFIER, "Expect superclass name");
       superclass = Variable(_previous());
     }
-    _consume(TokenType.LEFT_BRACE, "Expect '{' before class body");
+    _consume(.LEFT_BRACE, "Expect '{' before class body");
     List<FunctionDeclaration> methods = [];
-    while (!_check(TokenType.RIGHT_BRACE) && !_isAtEnd()) {
+    while (!_check(.RIGHT_BRACE) && !_isAtEnd()) {
       methods.add(_function("method"));
     }
 
-    _consume(TokenType.RIGHT_BRACE, "Expect '}' after class body.");
+    _consume(.RIGHT_BRACE, "Expect '}' after class body.");
 
     return LoxClass(id, methods, superclass: superclass);
   }
@@ -196,7 +190,7 @@ class Parser {
     if (_match([TokenType.WHILE, TokenType.FOR])) {
       _loopDepth++;
       late LoopStatement out;
-      if (_previous().type == TokenType.WHILE) {
+      if (_previous().type == .WHILE) {
         out = _while();
       } else {
         out = _for();
@@ -213,7 +207,7 @@ class Parser {
           "break needs to be inside of a loop.",
         );
       }
-      _consume(TokenType.SEMICOLON, "Expect ';' after break statement.");
+      _consume(.SEMICOLON, "Expect ';' after break statement.");
       return BreakStatement();
     }
 
@@ -223,7 +217,7 @@ class Parser {
   //TODO during optimazation these can be unrolled into while loops
   ForStatement _for() {
     logger.finer("Parsing for loop");
-    _consume(TokenType.LEFT_PAREN, "Expect '(' after for");
+    _consume(.LEFT_PAREN, "Expect '(' after for");
     Declaration? initializer;
     if (_match(TokenType.SEMICOLON)) {
       initializer = null;
@@ -242,7 +236,7 @@ class Parser {
 
     logger.finer("Condition: ${condition?.prettyPrint ?? ""}");
 
-    _consume(TokenType.SEMICOLON, "Expect ';' after loop condition");
+    _consume(.SEMICOLON, "Expect ';' after loop condition");
 
     Expr? increment;
     if (!_check(TokenType.RIGHT_PAREN)) {
@@ -250,7 +244,7 @@ class Parser {
     }
 
     logger.finer("Increment: ${increment?.prettyPrint ?? ""}");
-    _consume(TokenType.RIGHT_PAREN, "Expect ')' after for clauses");
+    _consume(.RIGHT_PAREN, "Expect ')' after for clauses");
     Statement body = _statement();
     logger.finer("Body: ${body.prettyPrint}");
 
@@ -261,7 +255,7 @@ class Parser {
     logger.finer("Parsing block");
 
     List<Declaration> out = [];
-    while (!_check(TokenType.RIGHT_BRACE) && !_isAtEnd()) {
+    while (!_check(.RIGHT_BRACE) && !_isAtEnd()) {
       Declaration? toAdd = _declaration();
       if (toAdd != null) {
         logger.finest("Parsed param ${toAdd.prettyPrint}");
@@ -271,15 +265,15 @@ class Parser {
 
     logger.finer("Block body: ${out.prettyPrint}");
 
-    _consume(TokenType.RIGHT_BRACE, "Expect '}' after block");
+    _consume(.RIGHT_BRACE, "Expect '}' after block");
 
     return out;
   }
 
   IfStatement _if() {
-    _consume(TokenType.LEFT_PAREN, "Expected '(' after if.");
+    _consume(.LEFT_PAREN, "Expected '(' after if.");
     Expr condition = _expression();
-    _consume(TokenType.RIGHT_PAREN, "Expected ')' after condition.");
+    _consume(.RIGHT_PAREN, "Expected ')' after condition.");
     Statement ifTrue = _statement();
     Statement? ifFalse;
 
@@ -293,18 +287,18 @@ class Parser {
     logger.finer("Parsing return statement");
     Token keyword = _previous();
     Expr? value;
-    if (!_check(TokenType.SEMICOLON)) {
+    if (!_check(.SEMICOLON)) {
       value = _expression();
     }
     logger.finer("ReturnValue: ${value?.prettyPrint ?? "nil"}");
-    _consume(TokenType.SEMICOLON, "Expected ';' after return value.");
+    _consume(.SEMICOLON, "Expected ';' after return value.");
     return ReturnStatement(keyword, value);
   }
 
   WhileStatement _while() {
-    _consume(TokenType.LEFT_PAREN, "Expected '(' after while.");
+    _consume(.LEFT_PAREN, "Expected '(' after while.");
     Expr condition = _expression();
-    _consume(TokenType.RIGHT_PAREN, "Expected ')' after condition.");
+    _consume(.RIGHT_PAREN, "Expected ')' after condition.");
     Statement body = _statement();
     return WhileStatement(condition, body);
   }
@@ -313,7 +307,7 @@ class Parser {
     logger.finer("Parsing print statement");
     Expr expr = _assignment();
     logger.finer("ToPrint: ${expr.prettyPrint}");
-    _consume(TokenType.SEMICOLON, "Expect ';' after value.");
+    _consume(.SEMICOLON, "Expect ';' after value.");
     return PrintStatement(expr);
   }
 
@@ -324,7 +318,7 @@ class Parser {
     Token id = _previous();
     ReadTarget target = isDeclRead ? VarDecl(id, null) : Variable(id);
     logger.finer("Reading into ${target.prettyPrint}");
-    _consume(TokenType.SEMICOLON, "Expect ';' after value.");
+    _consume(.SEMICOLON, "Expect ';' after value.");
     return ReadStatement(target);
   }
 
@@ -332,7 +326,7 @@ class Parser {
     logger.finer("Parsing expression statement");
     Expr expr = _assignment();
     logger.finer("Expr: ${expr.prettyPrint}");
-    _consume(TokenType.SEMICOLON, "Expect ';' after value.");
+    _consume(.SEMICOLON, "Expect ';' after value.");
     return ExprStatement(expr);
   }
 
@@ -348,15 +342,12 @@ class Parser {
 
   LambdaFunc _lambdaFunction() {
     logger.finer("Parsing lambda function");
-    _consume(TokenType.LEFT_PAREN, "Expected '(' after fun");
+    _consume(.LEFT_PAREN, "Expected '(' after fun");
     List<Token> params = _parameters();
     logger.finer("Function Params: ${params.map((e) => e.lexeme).join(", ")}");
-    _consume(
-      TokenType.RIGHT_PAREN,
-      "Expected ')' after function parameter list",
-    );
+    _consume(.RIGHT_PAREN, "Expected ')' after function parameter list");
 
-    _consume(TokenType.LEFT_BRACE, "Expected '{' at start of block");
+    _consume(.LEFT_BRACE, "Expected '{' at start of block");
     List<Declaration> body = _block();
     logger.finer("Body: ${body.prettyPrint}");
     return LambdaFunc(params, body);
@@ -383,7 +374,7 @@ class Parser {
     if (_match(TokenType.QUESTION)) {
       logger.finer("Parsing ternary expression");
       Expr trueCase = _assignment();
-      _consume(TokenType.COLON, "':' expected in ternary");
+      _consume(.COLON, "':' expected in ternary");
       Expr falseCase = _assignment();
       return Ternary(expr, trueCase, falseCase);
     }
@@ -456,7 +447,7 @@ class Parser {
   Call _finishCall(Expr primary) {
     Token paren = _previous();
     Call out = Call(primary, paren, _args());
-    _consume(TokenType.RIGHT_PAREN, "Expected ')' after arguments.");
+    _consume(.RIGHT_PAREN, "Expected ')' after arguments.");
     return out;
   }
 
@@ -467,10 +458,7 @@ class Parser {
       if (_match(TokenType.LEFT_PAREN)) {
         out = _finishCall(out);
       } else if (_match(TokenType.DOT)) {
-        Token name = _consume(
-          TokenType.IDENTIFIER,
-          "Expect property name afte '.'.",
-        );
+        Token name = _consume(.IDENTIFIER, "Expect property name afte '.'.");
         out = Get(out, name);
       } else {
         break;
@@ -481,7 +469,7 @@ class Parser {
 
   List<Expr> _args() {
     List<Expr> out = [];
-    if (!_check(TokenType.RIGHT_PAREN)) {
+    if (!_check(.RIGHT_PAREN)) {
       out.add(_expression());
       while (_match(TokenType.COMMA)) {
         out.add(_expression());
@@ -511,7 +499,7 @@ class Parser {
 
     if (_match(TokenType.LEFT_PAREN)) {
       Expr expr = _assignment();
-      _consume(TokenType.RIGHT_PAREN, "Expected ')' after expression");
+      _consume(.RIGHT_PAREN, "Expected ')' after expression");
       return Grouping(expr);
     }
 
@@ -522,11 +510,8 @@ class Parser {
 
     if (_match(TokenType.SUPER)) {
       Token keyword = _previous();
-      _consume(TokenType.DOT, "Expect '.' after 'super'");
-      Token method = _consume(
-        TokenType.IDENTIFIER,
-        "Expect superclass methods name",
-      );
+      _consume(.DOT, "Expect '.' after 'super'");
+      Token method = _consume(.IDENTIFIER, "Expect superclass methods name");
       return Super(keyword, method);
     }
 
@@ -556,18 +541,18 @@ class Parser {
     _advance();
 
     while (!_isAtEnd()) {
-      if (_previous().type == TokenType.SEMICOLON) return;
+      if (_previous().type == .SEMICOLON) return;
 
       switch (_peek().type) {
-        case TokenType.CLASS ||
-            TokenType.FUN ||
-            TokenType.VAR ||
-            TokenType.FOR ||
-            TokenType.IF ||
-            TokenType.WHILE ||
-            TokenType.PRINT ||
-            TokenType.READ ||
-            TokenType.RETURN:
+        case .CLASS ||
+            .FUN ||
+            .VAR ||
+            .FOR ||
+            .IF ||
+            .WHILE ||
+            .PRINT ||
+            .READ ||
+            .RETURN:
           return;
         default:
           _advance();

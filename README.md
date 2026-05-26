@@ -56,3 +56,5 @@ Hello World
 dart run bin/dlox.dart format test/test_cases/hello_world.dlox
 print "Hello World";
 ```
+
+Powers the [Dlotter](https://github.com/VrugteVlieg/dlotter) project

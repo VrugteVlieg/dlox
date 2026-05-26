@@ -1,0 +1,4 @@
+var flag = true;
+print flag ? "Flag was true" : "Flag was false";
+flag = false;
+print flag ? "Flag was true" : "Flag was false";

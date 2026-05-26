@@ -45,7 +45,6 @@ List<Environment> scopeStack = [globalScope];
 Environment get _currentScope => scopeStack.last;
 
 Future<LoxValue> _eval(LoxNode n) async {
-  log.shout("Evaluating ${n.prettyPrint}(${n.runtimeType})");
   return switch (n) {
     Binary() => _binary(n),
     Grouping() => await _eval(n.expression),
@@ -175,10 +174,11 @@ Future<LoxValue> _classDecl(LoxClass c) async {
 }
 
 Future<LoxValue> _call(Call c) async {
+  log.fine("Calling $c");
   LoxValue callee = await _eval(c.callee);
   List<LoxValue> args = c.args.map((a) async => await _eval(a)).toList();
   if (callee is! LoxCallable) {
-    throw RuntimeError(c.paren, "Can only call functions and classes.");
+    throw RuntimeError(c.paren, "Can only call functions and classes found ${callee.runtimeType}");
   } else if (callee.arity() != args.length) {
     throw RuntimeError(
       c.paren,

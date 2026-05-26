@@ -1,7 +1,7 @@
 name: dlox
-description: A sample command-line application.
+description: An implementation of the lox programming language.
 version: 1.0.0
-# repository: https://github.com/my_org/my_repo
+repository: https://github.com/VrugteVlieg
 
 environment:
   sdk: ^3.11.0

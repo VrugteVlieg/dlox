@@ -21,8 +21,8 @@ extension StringifyNode on LoxValue {
       null => "nil",
       int i => i.toString(),
       double d => d.toString(),
-      String s => "\"$s\"",
-      var v => v.toString()
+      String s => s,
+      var v => v.toString(),
     };
   }
 }
@@ -94,10 +94,7 @@ class LoxClass implements Declaration {
 
   @override
   String get prettyPrint =>
-      "class ${id.lexeme}${superclass == null ? "" : " < ${superclass!.id.lexeme}"} {\n${methods.map(
-            (e) => e.prettyPrint,
-          ).join("\n\n")}\n}";
+      "class ${id.lexeme}${superclass == null ? "" : " < ${superclass!.id.lexeme}"} {\n${methods.map((e) => e.prettyPrint).join("\n\n")}\n}";
 }
 
-
-sealed class ReadTarget extends LoxNode  {}
+sealed class ReadTarget extends LoxNode {}
